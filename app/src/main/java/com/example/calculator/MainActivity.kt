@@ -1,9 +1,13 @@
 package com.example.calculator
 
+import android.animation.ObjectAnimator
 import android.os.Bundle
+import android.view.View
+import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
@@ -11,6 +15,7 @@ import androidx.compose.ui.Modifier
 import com.example.calculator.ui.theme.CalculatorTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
@@ -19,20 +24,56 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.animation.doOnEnd
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.calculator.ui.theme.MediumGray
 import com.example.calculator.ui.theme.Orange
+import androidx.compose.material3.Surface
 
 class MainActivity : ComponentActivity() {
+
+    private val viewModel by viewModels<MainViewModel>()
+
     @OptIn(ExperimentalComposeUiApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen().apply {
+            setKeepOnScreenCondition {
+                !viewModel.isReady.value
+            }
+            setOnExitAnimationListener { screen ->
+                val zoomX = ObjectAnimator.ofFloat(
+                    screen.iconView,
+                    View.SCALE_X,
+                    0.4f,
+                    0.0f
+                )
+                zoomX.interpolator = OvershootInterpolator()
+                zoomX.duration = 500L
+                zoomX.doOnEnd { screen.remove() }
+
+                val zoomY = ObjectAnimator.ofFloat(
+                    screen.iconView,
+                    View.SCALE_Y,
+                    0.4f,
+                    0.0f
+                )
+                zoomY.interpolator = OvershootInterpolator()
+                zoomY.duration = 500L
+                zoomY.doOnEnd { screen.remove() }
+
+                zoomX.start()
+                zoomY.start()
+            }
+        }
         enableEdgeToEdge()
         setContent {
             CalculatorTheme {
-                val viewModel = viewModel<CalculatorViewModel>()
-                val state = viewModel.state
+                val calculatorViewModel = viewModel<CalculatorViewModel>()
+                val state = calculatorViewModel.state
                 val buttonSpacing = 8.dp
+
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -68,7 +109,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(2f)
                                     .weight(2f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Clear)
+                                calculatorViewModel.onAction(CalculatorAction.Clear)
                             }
                             CalculatorButton(
                                 symbol = "Del",
@@ -77,7 +118,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Delete)
+                                calculatorViewModel.onAction(CalculatorAction.Delete)
                             }
                             CalculatorButton(
                                 symbol = "/",
@@ -86,7 +127,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Operation(CalculatorOperation.Divide))
+                                calculatorViewModel.onAction(CalculatorAction.Operation(CalculatorOperation.Divide))
                             }
                         }
                         Row(
@@ -101,7 +142,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Number(7))
+                                calculatorViewModel.onAction(CalculatorAction.Number(7))
                             }
                             CalculatorButton(
                                 symbol = "8",
@@ -110,7 +151,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Number(8))
+                                calculatorViewModel.onAction(CalculatorAction.Number(8))
                             }
                             CalculatorButton(
                                 symbol = "9",
@@ -119,7 +160,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Number(9))
+                                calculatorViewModel.onAction(CalculatorAction.Number(9))
                             }
                             CalculatorButton(
                                 symbol = "x",
@@ -128,7 +169,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Operation(CalculatorOperation.Multiply))
+                                calculatorViewModel.onAction(CalculatorAction.Operation(CalculatorOperation.Multiply))
                             }
                         }
                         Row(
@@ -143,7 +184,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Number(4))
+                                calculatorViewModel.onAction(CalculatorAction.Number(4))
                             }
                             CalculatorButton(
                                 symbol = "5",
@@ -152,7 +193,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Number(5))
+                                calculatorViewModel.onAction(CalculatorAction.Number(5))
                             }
                             CalculatorButton(
                                 symbol = "6",
@@ -161,7 +202,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Number(6))
+                                calculatorViewModel.onAction(CalculatorAction.Number(6))
                             }
                             CalculatorButton(
                                 symbol = "-",
@@ -170,7 +211,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Operation(CalculatorOperation.Subtract))
+                                calculatorViewModel.onAction(CalculatorAction.Operation(CalculatorOperation.Subtract))
                             }
                         }
                         Row(
@@ -185,7 +226,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Number(1))
+                                calculatorViewModel.onAction(CalculatorAction.Number(1))
                             }
                             CalculatorButton(
                                 symbol = "2",
@@ -194,7 +235,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Number(2))
+                                calculatorViewModel.onAction(CalculatorAction.Number(2))
                             }
                             CalculatorButton(
                                 symbol = "3",
@@ -203,7 +244,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Number(3))
+                                calculatorViewModel.onAction(CalculatorAction.Number(3))
                             }
                             CalculatorButton(
                                 symbol = "+",
@@ -212,7 +253,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Operation(CalculatorOperation.Add))
+                                calculatorViewModel.onAction(CalculatorAction.Operation(CalculatorOperation.Add))
                             }
                         }
                         Row(
@@ -227,7 +268,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(2f)
                                     .weight(2f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Number(0))
+                                calculatorViewModel.onAction(CalculatorAction.Number(0))
                             }
                             CalculatorButton(
                                 symbol = ".",
@@ -236,7 +277,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Decimal)
+                                calculatorViewModel.onAction(CalculatorAction.Decimal)
                             }
                             CalculatorButton(
                                 symbol = "=",
@@ -245,7 +286,7 @@ class MainActivity : ComponentActivity() {
                                     .aspectRatio(1f)
                                     .weight(1f)
                             ) {
-                                viewModel.onAction(CalculatorAction.Calculate)
+                                calculatorViewModel.onAction(CalculatorAction.Calculate)
                             }
                         }
                     }
